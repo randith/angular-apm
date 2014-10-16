@@ -1,0 +1,32 @@
+{
+  "name": "angular-apm",
+  "main": "angular-apm.js",
+  "version": "0.1.0",
+  "homepage": "https://github.com/randith/angular-apm",
+  "authors": [
+    "randith <randi.l.thom@gmail.com>"
+  ],
+  "description": "angular module for application performance monitoring",
+  "keywords": [
+    "apm",
+    "angular",
+    "performance"
+  ],
+  "license": "MIT",
+  "location": "git@github.com:randith/angular-apm.git",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "example",
+    "karma.conf.js",
+    "LICENSE",
+    "README.md",
+    "Gruntfile.js"
+  ],
+  "dependencies": {
+    "angular": "*"
+  }
+}
