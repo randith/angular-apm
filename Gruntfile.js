@@ -15,9 +15,9 @@ module.exports = function (grunt) {
         minified : {
             files: {
                 src: [
-                    './angular-cookie.js'
+                    './src/angular-apm.js'
                 ],
-                dest: './'
+                dest: './dist/'
             },
             options : {
                 allinone: false,

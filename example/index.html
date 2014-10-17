@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" ng-app="perfExampleApp" >
+<head>
+    <meta charset="utf-8">
+    <title>AngularJS App</title>
+
+    <style type="text/css">
+        body { font-family: Arial; font-size: 18px;}
+
+        div.box { border: 1px solid black; margin:5px; border-radius:11px; padding: 3px; float:left;}
+    </style>
+
+    <script type="text/javascript" src="lib/angular/angular.js"></script>
+    <script type="text/javascript" src="../src/angular-apm.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+
+</head>
+<body>
+
+<h3>Open developer tools (F12) and wait for the beacon.png request in your network tab</h3>
+<h4>These DIVs are faking API calls and will complete in 1-10 seconds</h4>
+
+
+<div>
+
+
+    <div style="float:left;">
+
+        <div class="box" data-ng-controller="Controller1">
+            <p>DIV 1 contents:</p>
+            <div ng-show="Loaded">{{ Loaded }}</div>
+            <div ng-hide="Loaded"><img src="img/loading.gif" /></div>
+        </div>
+
+        <div  class="box" data-ng-controller="Controller2">
+            <p>DIV 2 contents:</p>
+            <div ng-hide="Products"><img src="img/loading.gif" /></div>
+            <div ng-show="Products" data-ng-repeat="n in Products.Names">{{ n }}</div>
+        </div>
+
+        <div  class="box" data-ng-controller="Controller3">
+            <p>DIV 3 contents:</p>
+            <div ng-hide="Status.Complete"><img src="img/loading.gif" /></div>
+            <div ng-show="Status.Complete" >Three API calls complete</div>
+        </div>
+    </div>
+
+
+</div>
+
+</body>
+</html>

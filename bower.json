@@ -27,6 +27,6 @@
     "Gruntfile.js"
   ],
   "dependencies": {
-    "angular": "*"
+    "angular": ">=1.2"
   }
 }
