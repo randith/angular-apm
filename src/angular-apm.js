@@ -14,6 +14,8 @@ angular.module('perfMonitor', [
         var results = [];
         var activeCount = 0;
         var enabled = true;
+        // TODO should be configurable
+        var reportThreshhold = 1;
 
         return {
 
@@ -32,9 +34,11 @@ angular.module('perfMonitor', [
                 if (!enabled) {
                     return;
                 }
+                // TODO logging or not should be configurable
 //                console.time(PERF_NAME + "." + name);
 
-                if (name in activeMarkers) {
+                console.log("Starting " + name);
+                if (activeMarkers.hasOwnProperty(name)) {
                     console.warn("Tried to create duplicate active performance marker name: " + name);
                     return;
                 }
@@ -48,22 +52,29 @@ angular.module('perfMonitor', [
              */
             endMarker: function (name) {
 //                console.timeEnd(PERF_NAME + "." + name);
-
                 if (!enabled) {
                     return;
                 }
 
-                if (!name in activeMarkers) {
-                    console.warn("Tried to end nonexistent performance marker: " +  name);
+                if (!activeMarkers.hasOwnProperty(name)) {
+                    // we have to play a bit loose with digest marker due to it often being started while result is sent
+                    if (name !== DIGEST_MARKER) {
+                        console.warn("Tried to end nonexistent performance marker: " +  name);
+                    }
                     return;
                 }
 
                 var timeElapsed = new Date() - activeMarkers[name];
-                results.push(name + ":" + timeElapsed);
+                if (timeElapsed >= reportThreshhold) {
+                    results.push(name + ":" + timeElapsed);
+                }
                 delete activeMarkers[name];
                 activeCount--;
+
+                // send results
                 if (activeCount === 0) {
 
+                    // if we are monitoring the $digest assume that the $digest loop will be the last event
                     if (monitoringDigest && name !== DIGEST_MARKER) {
                         return;
                     }
@@ -73,10 +84,12 @@ angular.module('perfMonitor', [
                     var that = this;
                     $http({
                         method: "GET",
+                        // TODO needs to be configurable
                         url: "img/beacon.png",
                         params: { "metrics": encodeURI(results.toString()) }
                     }).then(function(resp) {
                         results = [];
+                        // so far re-enabling here has been good enable to prevent $digest-report-$digest loop, but it feels unsure
                         that.enable();
                     });
                 }

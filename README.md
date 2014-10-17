@@ -42,16 +42,17 @@ Run example
 To run example execute following commands
 
 ```
-git clone git@github.com:randith/angular-apm.git
+git clone https://github.com/randith/angular-apm
 cd angular-apm
-npm -g install bower
-npm -g install grunt
+npm -g install bower grunt
 npm install
 bower install
 grunt
 ```
 
-After this, go at ``127.0.0.1:9001/example`` in your browser, and you will see running example of ``angular-apm``.
+After this, go at ``127.0.0.1:9001/example`` in your browser, and you will see running example of ``angular-apm``.  
+Be sure to look at debugger to watch for GET img/beacon.png.  It should look something like:
+``http://127.0.0.1:9001/example/img/beacon.png?metrics=$digest:2,$digest:0,Controller2:2937,$digest:2,$digest:0,Controller3:7565,$digest:0,Controller1:8383,$digest:1``
 
 Usage
 -----
