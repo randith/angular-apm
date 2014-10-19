@@ -1,7 +1,7 @@
 angular-apm  
 ==============
 
-Service to set performance markers 
+Service to set performance markers and report via browser console or HTTP GET to beacon
 
 Installation
 ------------
@@ -51,17 +51,52 @@ grunt
 ```
 
 After this, go at ``127.0.0.1:9001/example`` in your browser, and you will see running example of ``angular-apm``.  
-Be sure to look at debugger to watch for GET img/beacon.png.  It should look something like:
-``http://127.0.0.1:9001/example/img/beacon.png?metrics=$digest:2,$digest:0,Controller2:2937,$digest:2,$digest:0,Controller3:7565,$digest:0,Controller1:8383,$digest:1``
+In the logs and the network debugger tab under img/beacon you should metrics such as:
+```markers=["$digest:2", "Controller2:329", "$digest:3", "Controller1:402", "$digest:1", "Controller3:8766"] ```
 
 Usage
 -----
 
+See example/js/app.js,  will document in the near future.
 
+
+Options
+-------
+
+#### logMetrics
+```
+logMetrics: true
+```
+
+The logMetrics boolean detemines whether the performance metrics should be logged to the browser's console.
+
+
+#### reportThreshold
+
+```
+reportThreshold: 10
+```
+
+The reportThreshold number is used to determine whether a metric is worth reporting.  Default is 10 milliseconds.
+
+#### beaconUrl
+
+```
+beaconUrl: undefined
+```
+
+The beaconUrl is used to determine whether and where to send the metrics via a HTTP GET.
+
+#### enabled
+
+```
+enabled: true
+```
+
+The enabled boolean is used to enable or disable the service.  This is intended to allow the markers to stay in the code without having any performance impact when not desired.
 
 TODO
 ----
 
-- make configurable beaconurl, logging
 - explicit start and stop instead of relying on being done when there are no 
 - karma unit tests

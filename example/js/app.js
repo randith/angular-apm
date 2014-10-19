@@ -5,6 +5,14 @@ angular.module('perfExampleApp', [
     'perfMonitor'
 ])
 
+    .config(['perfMonitorProvider', function(perfMonitorProvider) {
+       perfMonitorProvider.setOptions({
+           logMetrics: true,
+           reportThreshold: 1,
+           beaconUrl: 'img/beacon.png'
+       });
+    }])
+
     .run(function($rootScope, perfMonitor) {
         perfMonitor.monitorDigest($rootScope);
     })
@@ -34,7 +42,7 @@ angular.module('perfExampleApp', [
 
         var loaded = function() {
             if($scope.Object1 && $scope.Object2 && $scope.Object3){
-                $scope.Status = { Complete: true }
+                $scope.Status = { Complete: true };
                 perfMonitor.endMarker('Controller3');
             }
         };

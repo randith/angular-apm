@@ -1,119 +1,125 @@
 /*
  * Copyright 2014 Jive Software
  */
-angular.module('perfMonitor', [
-])
+(function(angular) {
+    'use strict';
 
-    .factory('perfMonitor', ['$http', function($http) {
-        'use strict';
+    angular.module('perfMonitor', [])
 
+        .provider('perfMonitor', function() {
+            var options = {
+                logMetrics: true,
+                reportThreshold: 10,
+                beaconUrl: undefined,
+                enabled: true
+            };
+            var DIGEST_MARKER = '$digest',
+                monitoringDigest = false,
+                activeMarkers = {},
+                results = [],
+                activeCount = 0;
 
-        var DIGEST_MARKER = '$digest';
-        var monitoringDigest = false;
-        var activeMarkers = {};
-        var results = [];
-        var activeCount = 0;
-        var enabled = true;
-        // TODO should be configurable
-        var reportThreshhold = 1;
+            this.setOptions = function(newOptions) {
+                angular.extend(options, newOptions);
+            };
 
-        return {
+            this.$get = function($http) {
 
-            disable: function() {
-                enabled = false;
-            },
+                function perfGoodness() {}
 
-            enable: function() {
-                enabled = true;
-            },
+                perfGoodness.disable = function() {
+                    options.enabled = false;
+                };
 
-            /**
-             * @param {string} name for marker to start
-             */
-            startMarker: function (name) {
-                if (!enabled) {
-                    return;
-                }
-                // TODO logging or not should be configurable
-//                console.time(PERF_NAME + "." + name);
+                perfGoodness.enable = function() {
+                    options.enabled = true;
+                };
 
-                console.log("Starting " + name);
-                if (activeMarkers.hasOwnProperty(name)) {
-                    console.warn("Tried to create duplicate active performance marker name: " + name);
-                    return;
-                }
-                activeMarkers[name] = new Date();
-                activeCount++;
-
-            },
-
-            /**
-             * @param {string} name for marker to end
-             */
-            endMarker: function (name) {
-//                console.timeEnd(PERF_NAME + "." + name);
-                if (!enabled) {
-                    return;
-                }
-
-                if (!activeMarkers.hasOwnProperty(name)) {
-                    // we have to play a bit loose with digest marker due to it often being started while result is sent
-                    if (name !== DIGEST_MARKER) {
-                        console.warn("Tried to end nonexistent performance marker: " +  name);
-                    }
-                    return;
-                }
-
-                var timeElapsed = new Date() - activeMarkers[name];
-                if (timeElapsed >= reportThreshhold) {
-                    results.push(name + ":" + timeElapsed);
-                }
-                delete activeMarkers[name];
-                activeCount--;
-
-                // send results
-                if (activeCount === 0) {
-
-                    // if we are monitoring the $digest assume that the $digest loop will be the last event
-                    if (monitoringDigest && name !== DIGEST_MARKER) {
+                perfGoodness.startMarker = function(name) {
+                    if (!options.enabled) {
                         return;
                     }
 
-                    // disable so that there is no infinite loop
-                    this.disable();
-                    var that = this;
-                    $http({
-                        method: "GET",
-                        // TODO needs to be configurable
-                        url: "img/beacon.png",
-                        params: { "metrics": encodeURI(results.toString()) }
-                    }).then(function(resp) {
-                        results = [];
-                        // so far re-enabling here has been good enable to prevent $digest-report-$digest loop, but it feels unsure
-                        that.enable();
-                    });
-                }
-
-            },
-
-            /**
-             */
-            monitorDigest: function ($rootScope) {
-                if (!enabled) {
-                    return;
-                }
-
-                monitoringDigest = true;
-                var $oldDigest = $rootScope.$digest;
-                var that = this;
-                $rootScope.$digest = function() {
-                    that.startMarker(DIGEST_MARKER);
-                    $oldDigest.apply($rootScope);
-                    that.endMarker(DIGEST_MARKER);
+                    if (activeMarkers.hasOwnProperty(name)) {
+                        console.warn("Tried to create duplicate active performance marker name: " + name);
+                        return;
+                    }
+                    activeMarkers[name] = new Date();
+                    activeCount++;
                 };
-            }
 
-        };
+                perfGoodness.endMarker = function(name) {
+                    if (!options.enabled) {
+                        return;
+                    }
 
-    }])
-;
+                    if (!activeMarkers.hasOwnProperty(name)) {
+                        // we have to play a bit loose with digest marker due to it often being started while result is sent
+                        if (name !== DIGEST_MARKER) {
+                            console.warn("Tried to end nonexistent performance marker: " + name);
+                        }
+                        return;
+                    }
+
+                    var timeElapsed = new Date() - activeMarkers[name];
+                    if (timeElapsed >= options.reportThreshold) {
+                        results.push(name + ":" + timeElapsed);
+                    }
+                    delete activeMarkers[name];
+                    activeCount--;
+
+                    // report/send results
+                    if (activeCount === 0) {
+
+                        // if we are monitoring the $digest assume that the $digest loop will be the last event
+                        if (monitoringDigest && name !== DIGEST_MARKER) {
+                            return;
+                        }
+
+                        if (options.logMetrics) {
+                            console.log("markers=%o", results);
+                        }
+
+                        if (options.beaconUrl) {
+                            // disable so that there is no infinite loop
+                            this.disable();
+                            var that = this;
+                            $http({
+                                method: "GET",
+                                url: options.beaconUrl,
+                                params: { "markers": encodeURI(results.toString()) }
+                            }).then(function (resp) {
+                                results = [];
+                                // so far re-enabling here has been good enable to prevent $digest-report-$digest loop, but it feels risky
+                                that.enable();
+                            });
+                        } else {
+                            results = [];
+                        }
+                    }
+                };
+
+                perfGoodness.monitorDigest = function($rootScope) {
+                    if (!options.enabled) {
+                        return;
+                    }
+
+                    monitoringDigest = true;
+                    var $oldDigest = $rootScope.$digest;
+                    var that = this;
+                    $rootScope.$digest = function () {
+                        that.startMarker(DIGEST_MARKER);
+                        $oldDigest.apply($rootScope);
+                        that.endMarker(DIGEST_MARKER);
+                    };
+
+                };
+
+                return perfGoodness;
+
+            };
+
+        })
+    ;
+
+})(window.angular);
