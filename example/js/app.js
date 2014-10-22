@@ -18,6 +18,7 @@ angular.module('perfExampleApp', [
     })
 
     .controller('Controller1', ['$scope', '$timeout', 'perfMonitor', function($scope, $timeout, perfMonitor) {
+        perfMonitor.startView("exampleView");
         perfMonitor.startMarker('Controller1');
 
         $timeout(function() {

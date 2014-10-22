@@ -27,6 +27,7 @@
     "Gruntfile.js"
   ],
   "dependencies": {
-    "angular": ">=1.2"
+    "angular": ">=1.2",
+    "angular-mocks": ">=1.2"
   }
 }
