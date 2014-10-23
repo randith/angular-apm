@@ -22,36 +22,53 @@
                 viewName = undefined,
                 viewMarker = undefined;
 
+            function reset() {
+                activeMarkers = {};
+                results = [];
+                activeCount = 0;
+                viewName = undefined;
+                viewMarker = undefined;
+            }
+
             /**
              * @param {String} name to report
              * @param $http angular service
              * @param self this
              */
             function reportResults(name, $http, self) {
+                if(results.length === 0 && !viewMarker) {
+                    console.debug("No results met reportThreshold");
+                    reset();
+                    return;
+                }
+
+                if (viewMarker) {
+                    var timeElapsed = new Date() - viewMarker;
+                    results.push(viewName + ":" + timeElapsed);
+                }
+
                 if (options.logMetrics) {
                     console.log("%o=%o", name, results);
                 }
 
-                var _params = {};
-                _params[name] = encodeURI(results.toString());
-
                 if (options.beaconUrl) {
                     // disable so that there is no infinite loop
                     self.disable();
+                    var _params = {};
+                    _params[name] = encodeURI(results.toString());
                     $http({
                         method: "GET",
                         url: options.beaconUrl,
                         params: _params
                     }).then(function (resp) {
-                        results = [];
-                        // so far re-enabling here has been good enable to prevent $digest-report-$digest loop, but it feels risky
+                        reset();
+                        // so far re-enabling here has been good enough to prevent $digest-report-$digest loop, but it feels risky
                         self.enable();
                     });
                 } else {
-                    results = [];
+                    reset();
                 }
             }
-
 
             this.setOptions = function(newOptions) {
                 angular.extend(options, newOptions);
@@ -83,13 +100,14 @@
                         return;
                     }
 
+                    reset();
                     viewName = name;
-                    activeCount = 0;
-                    activeMarkers = {};
-                    results = [];
                     viewMarker = new Date();
                 };
 
+                /**
+                 * Report the completed markers
+                 */
                 perfGoodness.endView = function() {
                     if (!options.enabled) {
                         return;
@@ -103,7 +121,10 @@
                     reportResults(viewName, $http, this);
                 };
 
-
+                /**
+                 * Start the time on a measurable item
+                 * @param {String} name
+                 */
                 perfGoodness.startMarker = function(name) {
                     if (!options.enabled) {
                         return;
@@ -120,6 +141,10 @@
                     activeCount++;
                 };
 
+                /**
+                 * Complete marker and record time
+                 * @param {String} name
+                 */
                 perfGoodness.endMarker = function(name) {
                     if (!options.enabled) {
                         return;
@@ -153,6 +178,10 @@
                     }
                 };
 
+                /**
+                 * Decorate the angular $digest with a marker
+                 * @param $rootScope
+                 */
                 perfGoodness.monitorDigest = function($rootScope) {
                     if (!options.enabled) {
                         return;
