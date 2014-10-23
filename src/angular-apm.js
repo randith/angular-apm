@@ -111,14 +111,12 @@
                 perfGoodness.endView = function() {
                     if (!options.enabled) {
                         return;
-                    } else if (!options.reportOnEndView) {
-                        console.warn("Called endView with reportOnEndView set to false");
-                        return;
-                    } else if (!viewName) {
-                        console.warn("Called endView when view not started");
-                        return;
                     }
-                    reportResults(viewName, $http, this);
+                    if (!viewName) {
+                        reportResults('markers', $http, this);
+                    } else {
+                        reportResults(viewName, $http, this);
+                    }
                 };
 
                 /**

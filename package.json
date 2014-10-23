@@ -1,6 +1,6 @@
 {
     "name": "angular-apm",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "angular module for application performance monitoring",
     "main": "angular-apm.js",
     "directories": {
