@@ -1,7 +1,7 @@
 {
   "name": "angular-apm",
   "main": "angular-apm.js",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "homepage": "https://github.com/randith/angular-apm",
   "authors": [
     "randith <randi.l.thom@gmail.com>"

@@ -74,7 +74,7 @@
                 angular.extend(options, newOptions);
             };
 
-            this.$get = function($http) {
+            this.$get = ['$http', function($http) {
 
                 function perfGoodness() {}
 
@@ -198,7 +198,7 @@
 
                 return perfGoodness;
 
-            };
+            }];
 
         })
     ;
